@@ -33,7 +33,7 @@ import threading
 import platform
 
 from os import _exit, getcwd
-from os.path import exists, isfile, basename
+from os.path import exists, isfile, basename, abspath
 
 try:
     from Algorithms import algorithms
@@ -159,6 +159,9 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
     if exists(args.wordlist) and isfile(args.wordlist):
+        args.output = abspath(args.output)
+        if not args.output.endswith('/'):
+            args.output += '/'
         if not isfile(args.output):
             main(args)
         else:

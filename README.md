@@ -41,8 +41,8 @@ like to index it for MD5 and SHA1 cracking.
 
 First, create the MD5 and SHA1 indexes:
 
-    $ ./createidx.py -a md5 -w words.txt -o words-md5.idx
-    $ ./createidx.py -a sha1 -w words.txt -o words-sha1.idx
+    $ ./createidx.py -a md5 -w words.txt
+    $ ./createidx.py -a sha1 -w words.txt
 
 Next, build the sortidx program and run it on the indexes.
 
