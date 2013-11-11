@@ -32,8 +32,8 @@ import argparse
 import threading
 import platform
 
-from os import _exit
-from os.path import exists, isfile
+from os import _exit, getcwd
+from os.path import exists, isfile, basename
 
 try:
     from Algorithms import algorithms
@@ -58,13 +58,9 @@ WARN = bold + R + "[!] " + W
 MONEY = bold + O + "[$] " + W
 PROMPT = bold + P + "[?] " + W
 
-<<<<<<< Updated upstream
 
-def create_index(fword, fout, algo):
-=======
 def create_index(fword, fout, algorithm, flock):
     ''' Create an index and write to file '''
->>>>>>> Stashed changes
     position = fword.tell()
     line = fword.readline()
     while line:
@@ -75,25 +71,14 @@ def create_index(fword, fout, algorithm, flock):
         position = fword.tell()
         line = fword.readline()
 
-<<<<<<< Updated upstream
-def display_status(fin, fout):
-=======
+
 def display_status(fword, fout, flock):
     ''' Display status / progress '''
->>>>>>> Stashed changes
     try:
         megabyte = (1024.0 ** 2.0)
         fpath = os.path.abspath(fword.name)
         size = os.path.getsize(fpath) / megabyte
         sys.stdout.write(INFO + 'Reading %s ...\n' % fpath)
-<<<<<<< Updated upstream
-        while not fin.closed and not fout.closed:
-            mb_pos = float(fin.tell() / megabyte)
-            sys.stdout.write(clear)
-            sys.stdout.write(INFO + '%.2f Mb of %.2f Mb' % (mb_pos, size))
-            sys.stdout.write(' (%3.2f%s) ->' % ((100.0 * (mb_pos / size)), '%',))
-            sys.stdout.write(' %.2f Mb' % float(fout.tell() / megabyte))
-=======
         while not fword.closed and not fout.closed:
             flock.acquire()
             fword_pos = float(fword.tell() / megabyte)
@@ -103,66 +88,51 @@ def display_status(fword, fout, flock):
             sys.stdout.write(INFO + '%.2f Mb of %.2f Mb' % (fword_pos, size))
             sys.stdout.write(' (%3.2f%s) ->' % ((100.0 * (fword_pos / size)), '%',))
             sys.stdout.write(' "%s" (%.2f Mb)' % (fout.name, float(fout_pos / megabyte)))
->>>>>>> Stashed changes
             sys.stdout.flush()
             time.sleep(0.25)
     except:
         return  # Clean exit if we throw an exception
 
-<<<<<<< Updated upstream
-def main(args):
-    fword = open(args.wordlist, 'rb')
-    fout = open(args.fout, 'wb')
-=======
 
 def get_algorithms(args):
     ''' Returns a list of valid algorithms passed in by the cli '''
     if 'all' in args.algorithms:
-        return [algorithms[name] for name in algorithms.keys()]
+        return [algorithms[name] for name in algorithms]
     else:
         names = filter(lambda algo: algo in algorithms, args.algorithms)
         return [algorithms[name] for name in names]
 
 
 def index_wordlist(fword, fout, algorithm, flock):
->>>>>>> Stashed changes
     try:
-        thread = threading.Thread(target=display_status, args=(fword, fout,))
+        thread = threading.Thread(target=display_status, args=(fword, fout, flock))
         thread.start()
-<<<<<<< Updated upstream
-        create_index(fword, fout, args.algorithm)
-=======
         create_index(fword, fout, algorithm, flock)
->>>>>>> Stashed changes
     except KeyboardInterrupt:
-        sys.stdout.write(clear)
-        sys.stdout.write(WARN + 'User requested stop ...\n')
+        sys.stdout.write(clear + WARN + 'User requested stop ...\n')
         return
     finally:
         fout.close()
         fword.close()
         thread.join()
 
-
-<<<<<<< Updated upstream
-=======
 def main(args):
     flock = threading.Lock()
     for algo in get_algorithms(args):
         fword = open(args.wordlist, 'rb')
-        fout_name = args.fout + '-%s.idx' % algo.key
+        fname = basename(args.wordlist)
+        fout_path = args.output + '%s-%s.idx' % (fname[:fname.rfind('.')], algo.key)
         mode = 'wb'
-        if exists(fout_name) and isfile(fout_name):
-            prompt = raw_input(PROMPT+'File exist %s! [w/a/skip]: ' % fout_name)
+        if exists(fout_path) and isfile(fout_path):
+            prompt = raw_input(PROMPT+'File already exists %s [w/a/skip]: ' % fout_path)
             mode = 'ab' if prompt.lower() == 'a' else None
         if mode is not None:
-            fout = open(fout_name, mode)
+            fout = open(fout_path, mode)
             index_wordlist(fword, fout, algo, flock)
-    sys.stdout.write(clear)
-    sys.stdout.write(MONEY + 'All Done.\n')
+        sys.stdout.write(clear + INFO + "Completed index file %s\n" % fout_path)
+    sys.stdout.write(clear + MONEY + 'All Done.\n')
 
 
->>>>>>> Stashed changes
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Create unsorted IDX files',
@@ -179,17 +149,19 @@ if __name__ == '__main__':
     parser.add_argument('-a',
         nargs='*',
         dest='algorithms',
-        help='hashing algorithm to use: %s' % (['all']+ algorithms.keys()),
+        help='hashing algorithm to use: %s' % (['all']+ sorted(algorithms.keys())),
         required=True,
     )
     parser.add_argument('-o',
-        dest='fout',
-        help='output file to write data to',
+        dest='output',
+        default=getcwd(),
+        help='output directory to write data to',
     )
     args = parser.parse_args()
     if exists(args.wordlist) and isfile(args.wordlist):
-        if args.fout is None:
-            args.fout = args.wordlist[:args.wordlist.rfind('.')]
-        main(args)
+        if not isfile(args.output):
+            main(args)
+        else:
+            sys.stderr.write('Output directory "%s" is a file' % args.fout)
     else:
-        sys.stdout.write('Wordlist path does not exist, or is not file')
+        sys.stderr.write('Wordlist does not exist, or is not file')

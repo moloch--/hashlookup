@@ -237,7 +237,7 @@ if __name__ == '__main__':
     )
     parser.add_argument('-a',
         dest='algorithm',
-        help='hashing algorithm: %s' % algorithms.keys(),
+        help='hashing algorithm: %s' % sorted(algorithms.keys()),
         required=True,
     )
     parser.add_argument('-c',
