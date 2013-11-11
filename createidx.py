@@ -32,8 +32,7 @@ import argparse
 import threading
 import platform
 
-from os import _exit, getcwd
-from os.path import exists, isfile, basename, abspath
+from os import _exit, getcwd, path
 
 try:
     from Algorithms import algorithms
@@ -67,7 +66,9 @@ def create_index(fword, fout, algorithm, flock):
         word = line.strip('\r\n')
         fdigest = algorithm(word).digest()[:8]  # Only take first 64bits of hash
         fpos = struct.pack('<Q', position)[:6]  # Get 48bit int in little endian
+        flock.acquire()
         fout.write("%s%s" % (fdigest, fpos))
+        flock.release()
         position = fword.tell()
         line = fword.readline()
 
@@ -76,13 +77,13 @@ def display_status(fword, fout, flock):
     ''' Display status / progress '''
     try:
         megabyte = (1024.0 ** 2.0)
-        fpath = os.path.abspath(fword.name)
-        size = os.path.getsize(fpath) / megabyte
+        fpath = path.abspath(fword.name)
+        size = path.getsize(fpath) / megabyte
         sys.stdout.write(INFO + 'Reading %s ...\n' % fpath)
         while not fword.closed and not fout.closed:
             flock.acquire()
             fword_pos = float(fword.tell() / megabyte)
-            fout_post = fout.tell()
+            fout_pos = fout.tell()
             flock.release()
             sys.stdout.write(clear)
             sys.stdout.write(INFO + '%.2f Mb of %.2f Mb' % (fword_pos, size))
@@ -90,8 +91,8 @@ def display_status(fword, fout, flock):
             sys.stdout.write(' "%s" (%.2f Mb)' % (fout.name, float(fout_pos / megabyte)))
             sys.stdout.flush()
             time.sleep(0.25)
-    except:
-        return  # Clean exit if we throw an exception
+    except Exception as error:
+        raise error
 
 
 def get_algorithms(args):
@@ -116,20 +117,26 @@ def index_wordlist(fword, fout, algorithm, flock):
         fword.close()
         thread.join()
 
+
 def main(args):
     flock = threading.Lock()
     for algo in get_algorithms(args):
         fword = open(args.wordlist, 'rb')
-        fname = basename(args.wordlist)
+        fname = path.basename(args.wordlist)
         fout_path = args.output + '%s-%s.idx' % (fname[:fname.rfind('.')], algo.key)
         mode = 'wb'
-        if exists(fout_path) and isfile(fout_path):
+        if path.exists(fout_path) and path.isfile(fout_path):
             prompt = raw_input(PROMPT+'File already exists %s [w/a/skip]: ' % fout_path)
-            mode = 'ab' if prompt.lower() == 'a' else None
+            if prompt.lower() == 'a':
+                mode = 'ab'
+            elif prompt.lower() != 'w':
+                mode = None
         if mode is not None:
             fout = open(fout_path, mode)
+            sys.stdout.write(clear + INFO + "Creating %s index ...\n" % algo.name)
+            sys.stdout.flush()
             index_wordlist(fword, fout, algo, flock)
-        sys.stdout.write(clear + INFO + "Completed index file %s\n" % fout_path)
+            sys.stdout.write(clear + INFO + "Completed index file %s\n" % fout_path)
     sys.stdout.write(clear + MONEY + 'All Done.\n')
 
 
@@ -158,11 +165,11 @@ if __name__ == '__main__':
         help='output directory to write data to',
     )
     args = parser.parse_args()
-    if exists(args.wordlist) and isfile(args.wordlist):
-        args.output = abspath(args.output)
+    if path.exists(args.wordlist) and path.isfile(args.wordlist):
+        args.output = path.abspath(args.output)
         if not args.output.endswith('/'):
             args.output += '/'
-        if exists(args.output) and not isfile(args.output):
+        if path.exists(args.output) and not path.isfile(args.output):
             main(args)
         else:
             sys.stderr.write('Output directory "%s" does not exist' % args.fout)
