@@ -16,6 +16,23 @@ There are three components to this system:
 3. The lookup script (LookupTable.py), which uses the wordlist and index to
    crack hashes.
 
+Suported Algorithms:
+ * lm
+ * md4
+ * md5
+ * msdcc
+ * msdcc2
+ * mssqlv4
+ * mysql323
+ * ntlm
+ * oracle10g-sys
+ * oracle10g-system
+ * sha1
+ * sha224
+ * sha256
+ * sha384
+ * sha512
+
 Indexing a Dictionary
 ---------------------
 
