@@ -162,9 +162,9 @@ if __name__ == '__main__':
         args.output = abspath(args.output)
         if not args.output.endswith('/'):
             args.output += '/'
-        if not isfile(args.output):
+        if exists(args.output) and not isfile(args.output):
             main(args)
         else:
-            sys.stderr.write('Output directory "%s" is a file' % args.fout)
+            sys.stderr.write('Output directory "%s" does not exist' % args.fout)
     else:
         sys.stderr.write('Wordlist does not exist, or is not file')
