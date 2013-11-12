@@ -43,7 +43,7 @@ class BaseAlgorithm(object):
 
     _data = None
 
-    def __init__(self, data):
+    def __init__(self, data=None):
         self._data = data
 
     def update(self, data):
