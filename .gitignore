@@ -5,6 +5,9 @@ build/*
 dist/
 dist/*
 
+# Bins
+sortidx
+
 # Wordlists / Indexes
 *.txt
 *.idx

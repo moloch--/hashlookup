@@ -126,7 +126,7 @@ def main(args):
         fout_path = args.output + '%s-%s.idx' % (fname[:fname.rfind('.')], algo.key)
         mode = 'wb'
         if path.exists(fout_path) and path.isfile(fout_path):
-            prompt = raw_input(PROMPT+'File already exists %s [w/a/skip]: ' % fout_path)
+            prompt = raw_input(PROMPT + 'File already exists %s [w/a/skip]: ' % fout_path)
             if prompt.lower() == 'a':
                 mode = 'ab'
             elif prompt.lower() != 'w':
