@@ -25,6 +25,8 @@ word in the dictionary encoded as a 48-bit LITTLE ENDIAN integer.
 
 import sys
 import hashlib
+
+
 try:
     import passlib
     from passlib.hash import nthash, lmhash, mysql41, oracle10, mysql323, \
@@ -43,7 +45,7 @@ class BaseAlgorithm(object):
 
     _data = None
 
-    def __init__(self, data):
+    def __init__(self, data=None):
         self._data = data
 
     def update(self, data):

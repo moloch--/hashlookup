@@ -98,6 +98,10 @@ class LookupTable(object):
         return os.path.getsize(self.fp_index.name)
 
     @property
+    def words(self):
+        return self.index_size / ENTRY_SIZE
+
+    @property
     def wordlist_size(self):
         return os.path.getsize(self.fp_wordlist.name)
 

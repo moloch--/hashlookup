@@ -64,13 +64,19 @@ def create_index(fword, fout, algorithm, flock):
     line = fword.readline()
     while line:
         word = line.strip('\r\n')
-        fdigest = algorithm(word).digest()[:8]  # Only take first 64bits of hash
-        fpos = struct.pack('<Q', position)[:6]  # Get 48bit int in little endian
-        flock.acquire()
-        fout.write("%s%s" % (fdigest, fpos))
-        flock.release()
-        position = fword.tell()
-        line = fword.readline()
+        try:
+            fdigest = algorithm(word).digest()[:8]  # Only take first 64bits of hash
+            fpos = struct.pack('<Q', position)[:6]  # Get 48bit int in little endian
+            flock.acquire()
+            fout.write("%s%s" % (fdigest, fpos))
+            flock.release()
+        except KeyboardInterrupt:
+            return
+        except UnicodeDecodeError:
+            pass  # Ignore decode errors, just keep going
+        finally:
+            position = fword.tell()
+            line = fword.readline()
 
 
 def display_status(fword, fout, flock):
