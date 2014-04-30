@@ -132,7 +132,7 @@ def main(args):
         fout_path = args.output + '%s-%s.idx' % (fname[:fname.rfind('.')], algo.key)
         mode = 'wb'
         if path.exists(fout_path) and path.isfile(fout_path):
-            prompt = raw_input(PROMPT + 'File already exists %s [w/a/skip]: ' % fout_path)
+            prompt = raw_input(PROMPT+'File already exists %s [w/a/skip]: ' % fout_path)
             if prompt.lower() == 'a':
                 mode = 'ab'
             elif prompt.lower() != 'w':
@@ -178,6 +178,6 @@ if __name__ == '__main__':
         if path.exists(args.output) and not path.isfile(args.output):
             main(args)
         else:
-            sys.stderr.write('Output directory "%s" does not exist' % args.fout)
+            sys.stderr.write('Output directory "%s" does not exist' % args.output)
     else:
         sys.stderr.write('Wordlist does not exist, or is not file')

@@ -25,8 +25,6 @@ word in the dictionary encoded as a 48-bit LITTLE ENDIAN integer.
 
 import sys
 import hashlib
-
-
 try:
     import passlib
     from passlib.hash import nthash, lmhash, mysql41, oracle10, mysql323, \
@@ -154,7 +152,7 @@ class Ntlm(BaseAlgorithm):
     hex_length = 32
 
     def digest(self):
-        return nthash.encrypt(self._data).decode('hex')
+        return nthash.encrypt(self._data[:127]).decode('hex')
 
 
 class MySql323(BaseAlgorithm):
