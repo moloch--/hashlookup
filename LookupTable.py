@@ -57,7 +57,6 @@ HASH_SIZE = 8
 ENTRY_SIZE = POS_SIZE + HASH_SIZE
 
 
-
 class LookupTable(object):
 
     _lower = 0
@@ -65,7 +64,7 @@ class LookupTable(object):
 
     def __init__(self, algorithm, index_file, wordlist_file, verbose=False):
         self.verbose = verbose
-        if not algorithm in algorithms:
+        if algorithm not in algorithms:
             raise ValueError('Algorithm is not supported')
         self.algorithm = algorithms[algorithm]
         self._info('Algorithm is set to %s' % algorithm)
@@ -178,7 +177,7 @@ class LookupTable(object):
         return collision
 
     def _idx_digest(self, index):
-        if not index in self._cache:
+        if index not in self._cache:
             self.fp_index.seek(index * ENTRY_SIZE)
             self._cache[index] = self.fp_index.read(HASH_SIZE)
         return self._cache[index]
@@ -186,7 +185,7 @@ class LookupTable(object):
     def _idx_position(self, index):
         self.fp_index.seek((index * ENTRY_SIZE) + HASH_SIZE)
         fpos = self.fp_index.read(POS_SIZE)
-        return struct.unpack('<Q', fpos+'\x00\x00')[0]
+        return struct.unpack('<Q', fpos + '\x00\x00')[0]
 
     def _word_at(self, offset):
         self.fp_wordlist.seek(offset)
@@ -206,59 +205,10 @@ if __name__ == '__main__':
         sys.stdout.flush()
         start = time.time()
         table[ls]
-        sys.stdout.write(INFO + "Total lookup time: %s\n" % (time.time()-start))
+        sys.stdout.write(INFO + "Total lookup time: %s\n" %
+                         (time.time() - start))
 
-    parser = argparse.ArgumentParser(
-        description='Search sorted IDX files for hashes',
-    )
-    parser.add_argument('-v', '--version',
-        action='version',
-        version='LookupTable 0.1.1',
-    )
-    parser.add_argument('-d', '--debug',
-        action='store_true',
-        dest='debug',
-        help='debug/verbose mode',
-    )
-    parser.add_argument('-b', '--benchmark',
-        action='store_true',
-        dest='benchmark',
-        help='benchmark by cracking 100,000 hashes',
-    )
-    parser.add_argument('-e', '--decoder',
-        dest='decoder',
-        help='decode hashes using an encoder',
-    )
-    parser.add_argument('-w',
-        dest='wordlist',
-        help='wordlist file',
-        required=True,
-    )
-    parser.add_argument('-i',
-        dest='index',
-        help='the .idx file matching the wordlist',
-        required=True,
-    )
-    parser.add_argument('-a',
-        dest='algorithm',
-        help='hashing algorithm: %s' % sorted(algorithms.keys()),
-        required=True,
-    )
-    parser.add_argument('-c',
-        nargs='*',
-        dest='hash',
-        help='crack a file or list of hashes',
-    )
-    args = parser.parse_args()
-    table = LookupTable(
-        algorithm=args.algorithm.lower(),
-        index_file=args.index,
-        wordlist_file=args.wordlist,
-        verbose=args.debug if not args.benchmark else False,
-    )
-    if args.benchmark:
-        benchmark(table)
-    elif args.hash is not None:
+    def _cli(args, table):
         if os.path.exists(args.hash[0]) and os.path.isfile(args.hash[0]):
             with open(args.hash[0]) as fp:
                 hashes = [line.strip() for line in fp]
@@ -272,9 +222,57 @@ if __name__ == '__main__':
         sys.stdout.write('\n\t\t*** Results ***\n\n')
         cracked = filter(lambda key: results[key] is not None, results)
         for index, hsh in enumerate(cracked):
-            sys.stdout.write(str(index) + ")  %s -> %s\n" % (hsh, results[hsh],))
-        sys.stdout.write("total lookup time: %.6f\n" % lookup_time)
+            sys.stdout.write(str(index) + ")  %s -> %s\n" %
+                             (hsh, results[hsh],))
+        sys.stdout.write("%sTotal lookup time: %.6f\n" % (INFO, lookup_time))
         percent = 100 * (float(len(cracked)) / float(len(hashes)))
-        sys.stdout.write("cracked %d of %d (%3.2f%s)\n" % (len(cracked), len(hashes), percent, '%'))
+        sys.stdout.write("%sCracked %d of %d (%3.2f%s)\n" %
+                         (MONEY, len(cracked), len(hashes), percent, '%'))
+
+    parser = argparse.ArgumentParser(
+        description='Search sorted IDX files for hashes',
+    )
+    parser.add_argument('-v', '--version',
+                        action='version',
+                        version='LookupTable 0.1.2')
+    parser.add_argument('-d', '--debug',
+                        action='store_true',
+                        dest='debug',
+                        help='debug/verbose mode')
+    parser.add_argument('-b', '--benchmark',
+                        action='store_true',
+                        dest='benchmark',
+                        help='benchmark by cracking 100,000 hashes')
+    parser.add_argument('-e', '--decoder',
+                        dest='decoder',
+                        help='decode hashes using an encoder')
+    parser.add_argument('-w',
+                        dest='wordlist',
+                        help='wordlist file',
+                        required=True)
+    parser.add_argument('-i',
+                        dest='index',
+                        help='the .idx file matching the wordlist',
+                        required=True)
+    parser.add_argument('-a',
+                        dest='algorithm',
+                        help='hashing algorithm: %s' % sorted(
+                            algorithms.keys()),
+                        required=True)
+    parser.add_argument('-c',
+                        nargs='*',
+                        dest='hash',
+                        help='crack a file or list of hashes')
+    args = parser.parse_args()
+    table = LookupTable(
+        algorithm=args.algorithm.lower(),
+        index_file=args.index,
+        wordlist_file=args.wordlist,
+        verbose=args.debug if not args.benchmark else False,
+    )
+    if args.benchmark:
+        benchmark(table)
+    elif args.hash is not None:
+        _cli(args, table)
     else:
         sys.stdout.write(WARN + 'No input hashes, see --help\n')
