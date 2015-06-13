@@ -169,11 +169,11 @@ class MySql41(BaseAlgorithm):
     ''' Ignore the preceeding "*" symbol '''
 
     name = 'MySQL v4.1'
-    key = 'mssqlv4'
+    key = 'mysqlv4'
     hex_length = 40
 
     def digest(self):
-        return mysql41.encrypt(self._data)[1:].decode('hex')
+        return mysql41.encrypt(self._data[:999])[1:].decode('hex')
 
 
 class Oracle10(BaseAlgorithm):
