@@ -132,6 +132,7 @@ class Sha512(BaseAlgorithm):
     def digest(self):
         return hashlib.sha512(self._data).digest()
 
+
 ##########################################################
 # > PASSLIB
 ##########################################################
@@ -142,7 +143,7 @@ class Lm(BaseAlgorithm):
     hex_length = 32
 
     def digest(self):
-        return lmhash.encrypt(self._data).decode('hex')
+        return lmhash.encrypt(self._data[:15]).decode('hex')
 
 
 class Ntlm(BaseAlgorithm):
@@ -162,7 +163,7 @@ class MySql323(BaseAlgorithm):
     hex_length = 16
 
     def digest(self):
-        return mysql323.encrypt(self._data).decode('hex')
+        return mysql323.encrypt(self._data[:64]).decode('hex')
 
 
 class MySql41(BaseAlgorithm):
@@ -173,7 +174,7 @@ class MySql41(BaseAlgorithm):
     hex_length = 40
 
     def digest(self):
-        return mysql41.encrypt(self._data[:999])[1:].decode('hex')
+        return mysql41.encrypt(self._data[:64])[1:].decode('hex')
 
 
 class Oracle10(BaseAlgorithm):
@@ -184,7 +185,7 @@ class Oracle10(BaseAlgorithm):
     hex_length = 16
 
     def digest(self):
-        return oracle10.encrypt(self._data, user=self._user).decode('hex')
+        return oracle10.encrypt(self._data[:64], user=self._user).decode('hex')
 
 
 class Oracle10_Sys(Oracle10):
@@ -209,7 +210,7 @@ class Msdcc(BaseAlgorithm):
     _user = "Administrator"
 
     def digest(self):
-        return msdcc.encrypt(self._data, user=self._user).decode('hex')
+        return msdcc.encrypt(self._data[:64], user=self._user).decode('hex')
 
 
 class Msdcc2(BaseAlgorithm):
@@ -220,8 +221,7 @@ class Msdcc2(BaseAlgorithm):
     _user = "Administrator"
 
     def digest(self):
-        return msdcc2.encrypt(self._data, user=self._user).decode('hex')
-
+        return msdcc2.encrypt(self._data[:64], user=self._user).decode('hex')
 
 
 # Base algorithms
@@ -244,4 +244,3 @@ if passlib is not None:
     algorithms[Oracle10_System.key] = Oracle10_System
     algorithms[Msdcc.key] = Msdcc
     algorithms[Msdcc2.key] = Msdcc2
-
