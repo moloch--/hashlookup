@@ -28,7 +28,7 @@ import hashlib
 try:
     import passlib
     from passlib.hash import nthash, lmhash, mysql41, oracle10, mysql323, \
-        msdcc, msdcc2
+        msdcc, msdcc2, postgres_md5
 except ImportError:
     err = "\nFailed to import passlib, some algorithms will be disabled\n"
     sys.stderr.write(err)
@@ -170,7 +170,7 @@ class MySql41(BaseAlgorithm):
     ''' Ignore the preceeding "*" symbol '''
 
     name = 'MySQL v4.1'
-    key = 'mysqlv4'
+    key = 'mysql41'
     hex_length = 40
 
     def digest(self):
@@ -202,23 +202,53 @@ class Oracle10_System(Oracle10):
     _user = 'SYSTEM'
 
 
-class Msdcc(BaseAlgorithm):
+class PostgresMd5(BaseAlgorithm):
+
+    hex_length = 32
+
+    def digest(self):
+        return postgres_md5.encrypt(self._data,
+                                    user=self._user).decode('hex')
+
+
+class PostgresMd5_Root(PostgresMd5):
+
+    name = 'Postgres MD5 (root)'
+    key = 'postgres_md5-root'
+    _user = 'root'
+
+
+class PostgresMd5_Postgres(PostgresMd5):
+
+    name = 'Postgres MD5 (postgres)'
+    key = 'postgres_md5-postgres'
+    _user = 'postgres'
+
+
+class PostgresMd5_Admin(PostgresMd5):
+
+    name = 'Postgres MD5 (admin)'
+    key = 'postgres_md5-admin'
+    _user = 'admin'
+
+
+class Msdcc_Administrator(BaseAlgorithm):
 
     name = 'MS Domain Cached Credentials'
-    key = 'msdcc'
+    key = 'msdcc-administrator'
     hex_length = 32
-    _user = "Administrator"
+    _user = "administrator"
 
     def digest(self):
         return msdcc.encrypt(self._data[:64], user=self._user).decode('hex')
 
 
-class Msdcc2(BaseAlgorithm):
+class Msdcc2_Administrator(BaseAlgorithm):
 
     name = 'MS Domain Cached Credentials v2'
-    key = 'msdcc2'
+    key = 'msdcc2-administrator'
     hex_length = 32
-    _user = "Administrator"
+    _user = "administrator"
 
     def digest(self):
         return msdcc2.encrypt(self._data[:64], user=self._user).decode('hex')
@@ -242,5 +272,8 @@ if passlib is not None:
     algorithms[MySql41.key] = MySql41
     algorithms[Oracle10_Sys.key] = Oracle10_Sys
     algorithms[Oracle10_System.key] = Oracle10_System
-    algorithms[Msdcc.key] = Msdcc
-    algorithms[Msdcc2.key] = Msdcc2
+    algorithms[Msdcc_Administrator.key] = Msdcc_Administrator
+    algorithms[Msdcc2_Administrator.key] = Msdcc2_Administrator
+    algorithms[PostgresMd5_Admin.key] = PostgresMd5_Admin
+    algorithms[PostgresMd5_Postgres.key] = PostgresMd5_Postgres
+    algorithms[PostgresMd5_Root.key] = PostgresMd5_Root
