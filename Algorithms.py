@@ -27,6 +27,7 @@ import sys
 import hashlib
 try:
     import passlib
+    #  from passlib.utils.handlers import MAX_PASSWORD_SIZE
     from passlib.hash import nthash, lmhash, mysql41, oracle10, mysql323, \
         msdcc, msdcc2, postgres_md5
 except ImportError:
