@@ -208,7 +208,7 @@ class PostgresMd5(BaseAlgorithm):
 
     def digest(self):
         ''' Removes the "md5" prefix '''
-        return postgres_md5.encrypt(self._data,
+        return postgres_md5.encrypt(self._data[:64],
                                     user=self._user)[3:].decode('hex')
 
 
