@@ -11,6 +11,8 @@ sortidx
 # Wordlists / Indexes
 *.txt
 *.idx
+indexes/
+indexes/*
 
 # SSL Files
 *.key

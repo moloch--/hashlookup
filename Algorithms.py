@@ -25,16 +25,31 @@ word in the dictionary encoded as a 48-bit LITTLE ENDIAN integer.
 
 import sys
 import hashlib
+
 try:
     import passlib
     #  from passlib.utils.handlers import MAX_PASSWORD_SIZE
     from passlib.hash import nthash, lmhash, mysql41, oracle10, mysql323, \
         msdcc, msdcc2, postgres_md5
 except ImportError:
-    err = "\nFailed to import passlib, some algorithms will be disabled\n"
+    err = "\nFailed to import passlib"
     sys.stderr.write(err)
     sys.stderr.flush()
     passlib = None
+
+try:
+    import sha3
+except ImportError:
+    sys.stderr.write("\nFailed to import SHA3")
+    sys.stderr.flush()
+    sha3 = None
+
+try:
+    import whirlpool
+except ImportError:
+    sys.stderr.write("\nFailed to import whirlpool")
+    sys.stderr.flush()
+    whirlpool = None
 
 
 class BaseAlgorithm(object):
@@ -55,7 +70,7 @@ class BaseAlgorithm(object):
 
     def digest(self):
         ''' Overload this method with your algorithm '''
-        pass
+        raise NotImplementedError()
 
     def hexdigest(self):
         return self.digest().encode('hex')
@@ -132,6 +147,61 @@ class Sha512(BaseAlgorithm):
 
     def digest(self):
         return hashlib.sha512(self._data).digest()
+
+
+class Ripemd160(BaseAlgorithm):
+
+    name = "RACE Integrity Primitives Evaluation Message Digest (160 bit)"
+    key = "ripemd160"
+    hex_length = 40
+
+    def digest(self):
+        md = hashlib.new('ripemd160')
+        md.update(self._data)
+        return md.digest()
+
+
+##########################################################
+# > SHA3
+##########################################################
+class Sha3_224(BaseAlgorithm):
+
+    name = 'Secure Hashing Algorithm 3 (224 bit)'
+    key = 'sha3-224'
+    hex_length = 56
+
+    def digest(self):
+        return sha3.sha3_224(self._data).digest()
+
+
+class Sha3_256(BaseAlgorithm):
+
+    name = 'Secure Hashing Algorithm 3 (256 bit)'
+    key = 'sha3-256'
+    hex_length = 64
+
+    def digest(self):
+        return sha3.sha3_256(self._data).digest()
+
+
+class Sha3_384(BaseAlgorithm):
+
+    name = 'Secure Hashing Algorithm 3 (384 bit)'
+    key = 'sha3-384'
+    hex_length = 96
+
+    def digest(self):
+        return sha3.sha3_384(self._data).digest()
+
+
+class Sha3_512(BaseAlgorithm):
+
+    name = 'Secure Hashing Algorithm 3 (512 bit)'
+    key = 'sha3-512'
+    hex_length = 128
+
+    def digest(self):
+        return sha3.sha3_512(self._data).digest()
 
 
 ##########################################################
@@ -256,6 +326,19 @@ class Msdcc2_Administrator(BaseAlgorithm):
         return msdcc2.encrypt(self._data[:64], user=self._user).decode('hex')
 
 
+##########################################################
+# > Whirlpool
+##########################################################
+class Whirlpool(BaseAlgorithm):
+
+    name = "Whirlpool"
+    key = "whirlpool"
+    hex_length = 128
+
+    def digest(self):
+        return whirlpool.new(self._data).digest()
+
+
 # Base algorithms
 algorithms = {
     Md4.key: Md4,
@@ -266,6 +349,15 @@ algorithms = {
     Sha384.key: Sha384,
     Sha512.key: Sha512,
 }
+
+if 'ripemd160' in hashlib.algorithms_available:
+    algorithms[Ripemd160.key] = Ripemd160
+
+if sha3 is not None:
+    algorithms[Sha3_224.key] = Sha3_224
+    algorithms[Sha3_256.key] = Sha3_256
+    algorithms[Sha3_384.key] = Sha3_384
+    algorithms[Sha3_512.key] = Sha3_512
 
 if passlib is not None:
     algorithms[Lm.key] = Lm
@@ -279,3 +371,6 @@ if passlib is not None:
     algorithms[PostgresMd5_Admin.key] = PostgresMd5_Admin
     algorithms[PostgresMd5_Postgres.key] = PostgresMd5_Postgres
     algorithms[PostgresMd5_Root.key] = PostgresMd5_Root
+
+if whirlpool is not None:
+    algorithms[Whirlpool.key] = Whirlpool
