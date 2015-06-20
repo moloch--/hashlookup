@@ -59,11 +59,10 @@ ENTRY_SIZE = POS_SIZE + HASH_SIZE
 
 class LookupTable(object):
 
-    _lower = 0
-    _cache = {}
-
     def __init__(self, algorithm, index_file, wordlist_file, verbose=False):
         self.verbose = verbose
+        self._lower = 0
+        self._cache = {}
         if algorithm not in algorithms:
             raise ValueError('Algorithm is not supported')
         self.algorithm = algorithms[algorithm]
