@@ -112,7 +112,7 @@ class Sha1(BaseAlgorithm):
 class Sha224(BaseAlgorithm):
 
     name = 'Secure Hashing Algorithm 2 (224 bit)'
-    key = 'sha224'
+    key = 'sha2-224'
     hex_length = 56
 
     def digest(self):
@@ -122,7 +122,7 @@ class Sha224(BaseAlgorithm):
 class Sha256(BaseAlgorithm):
 
     name = 'Secure Hashing Algorithm 2 (256 bit)'
-    key = 'sha256'
+    key = 'sha2-256'
     hex_length = 64
 
     def digest(self):
@@ -132,7 +132,7 @@ class Sha256(BaseAlgorithm):
 class Sha384(BaseAlgorithm):
 
     name = 'Secure Hashing Algorithm 2 (384 bit)'
-    key = 'sha384'
+    key = 'sha2-384'
     hex_length = 96
 
     def digest(self):
@@ -142,7 +142,7 @@ class Sha384(BaseAlgorithm):
 class Sha512(BaseAlgorithm):
 
     name = 'Secure Hashing Algorithm 2 (512 bit)'
-    key = 'sha512'
+    key = 'sha2-512'
     hex_length = 128
 
     def digest(self):
@@ -350,8 +350,9 @@ algorithms = {
     Sha512.key: Sha512,
 }
 
-if 'ripemd160' in hashlib.algorithms_available:
-    algorithms[Ripemd160.key] = Ripemd160
+if hasattr(hashlib, "algorithms_available"):
+    if 'ripemd160' in hashlib.algorithms_available:
+        algorithms[Ripemd160.key] = Ripemd160
 
 if sha3 is not None:
     algorithms[Sha3_224.key] = Sha3_224

@@ -22,7 +22,7 @@ Suported Algorithms:
  * md5
  * msdcc
  * msdcc2
- * mssqlv4
+ * mssql41
  * mysql323
  * ntlm
  * oracle10g-sys
@@ -30,10 +30,10 @@ Suported Algorithms:
  * whirlpool
  * ripemd160
  * sha1
- * sha224
- * sha256
- * sha384
- * sha512
+ * sha2-224
+ * sha2-256
+ * sha2-384
+ * sha2-512
  * sha3-224
  * sha3-256
  * sha3-384
