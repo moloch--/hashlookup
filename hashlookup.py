@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ class LookupTable(object):
         self._info("Checking %s indexes ..." % self.index_count)
 
     def __getitem__(self, items):
-        if isinstance(items, basestring):
+        if isinstance(items, str):
             items = [items]
         if not isinstance(items, list):
             raise ValueError('Index must be type basestring or list')
@@ -192,21 +192,6 @@ class LookupTable(object):
 
 if __name__ == '__main__':
 
-    def benchmark(table):
-        ls = []
-        sys.stdout.write(INFO + "Generating 100,000 random hashes\n")
-        sys.stdout.flush()
-        for x in range(0, 100000):
-            md = hashlib.md5()
-            md.update(os.urandom(8).encode('hex'))
-            ls.append(md.hexdigest())
-        sys.stdout.write(INFO + "Cracking hashes, please wait ...\n")
-        sys.stdout.flush()
-        start = time.time()
-        table[ls]
-        sys.stdout.write(INFO + "Total lookup time: %s\n" %
-                         (time.time() - start))
-
     def _cli(args, table):
         if os.path.exists(args.hash[0]) and os.path.isfile(args.hash[0]):
             with open(args.hash[0]) as fp:
@@ -214,19 +199,20 @@ if __name__ == '__main__':
         else:
             hashes = args.hash
         if args.decoder is not None:
-            hashes = [hsh.decode(args.decoder).encode('hex') for hsh in hashes]
+            hashes = [hsh.decode(args.decoder) for hsh in hashes]
         start = time.time()
         results = table[hashes]
         lookup_time = time.time() - start
         sys.stdout.write('\n\t\t*** Results ***\n\n')
         cracked = filter(lambda key: results[key] is not None, results)
         for index, hsh in enumerate(cracked):
-            sys.stdout.write(str(index) + ")  %s -> %s\n" %
-                             (hsh, results[hsh],))
+            sys.stdout.write(str(index) + ")  %s -> %s\n" % (hsh, results[hsh],))
+            sys.stdout.flush()
         sys.stdout.write("%sTotal lookup time: %.6f\n" % (INFO, lookup_time))
         percent = 100 * (float(len(cracked)) / float(len(hashes)))
         sys.stdout.write("%sCracked %d of %d (%3.2f%s)\n" %
                          (MONEY, len(cracked), len(hashes), percent, '%'))
+        sys.stdout.flush()
 
     parser = argparse.ArgumentParser(
         description='Search sorted IDX files for hashes',
@@ -238,10 +224,6 @@ if __name__ == '__main__':
                         action='store_true',
                         dest='debug',
                         help='debug/verbose mode')
-    parser.add_argument('-b', '--benchmark',
-                        action='store_true',
-                        dest='benchmark',
-                        help='benchmark by cracking 100,000 hashes')
     parser.add_argument('-e', '--decoder',
                         dest='decoder',
                         help='decode hashes using an encoder')
@@ -267,11 +249,9 @@ if __name__ == '__main__':
         algorithm=args.algorithm.lower(),
         index_file=args.index,
         wordlist_file=args.wordlist,
-        verbose=args.debug if not args.benchmark else False,
-    )
-    if args.benchmark:
-        benchmark(table)
-    elif args.hash is not None:
+        verbose=args.debug if not args.benchmark else False)
+    if args.hash is not None:
         _cli(args, table)
     else:
         sys.stdout.write(WARN + 'No input hashes, see --help\n')
+        sys.stdout.flush()

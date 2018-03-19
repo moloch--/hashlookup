@@ -65,14 +65,7 @@ Cracking Hashes
 Once you have generated and sorted the index, you can use the LookupTable class
 to crack hashes.  It can be used as a library or a standalone app.
 
-    $ ./LookupTable.py -a md5 -i words-md5.idx -w words.txt -c 1f3870be274f6c49b3e31a0c6728957f
-
-Downloads
-----------
-
-You can download my versions of the crackstion wordlist, with pre-computed and sorted indexes ready for cracking.  Includes the wordlist, as well as indexes for MD5, SHA1 and SHA256:
-
-[BTSync key](http://labs.bittorrent.com/experiments/sync.html) (42.5Gb): BYKIAW5MVA52ZJ6C7FNTDNX5TAB2ML4U2
+    $ ./hashlookup.py -a md5 -i words-md5.idx -w words.txt -c 1f3870be274f6c49b3e31a0c6728957f
 
 Adding Words
 ------------

@@ -1,18 +1,5 @@
+# Python files
 *.py[co]
-files/*
-build
-build/*
-dist/
-dist/*
-
-# Bins
-sortidx
-
-# Wordlists / Indexes
-*.txt
-*.idx
-indexes/
-indexes/*
 
 # SSL Files
 *.key
@@ -54,8 +41,14 @@ pip-log.txt
 .project
 .pydevproject
 
+# VSCode
+.vscode/
+
 # PyCharm
 .idea/*
 
 # OSX
 .DS_Store
+
+# Alembic migration scripts
+api/setup/migrations/versions/*

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,23 +26,18 @@ word in the dictionary encoded as a 48-bit LITTLE ENDIAN integer.
 import sys
 import hashlib
 
+from binascii import hexlify, unhexlify
+
 try:
     import passlib
     #  from passlib.utils.handlers import MAX_PASSWORD_SIZE
-    from passlib.hash import nthash, lmhash, mysql41, oracle10, mysql323, \
-        msdcc, msdcc2, postgres_md5
+    from passlib.hash import nthash, lmhash, mysql41, oracle10, mysql323
+    from passlib.hash import msdcc, msdcc2, postgres_md5
 except ImportError:
     err = "\nFailed to import passlib"
     sys.stderr.write(err)
     sys.stderr.flush()
     passlib = None
-
-try:
-    import sha3
-except ImportError:
-    sys.stderr.write("\nFailed to import SHA3")
-    sys.stderr.flush()
-    sha3 = None
 
 try:
     import whirlpool
@@ -60,20 +55,26 @@ class BaseAlgorithm(object):
     _data = None
 
     def __init__(self, data=None):
-        self._data = data
+        self.data = data if data is not None else b''
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        if not isinstance(value, bytes):
+            raise TypeError('Data must be bytes')
+        self._data = value
 
     def update(self, data):
-        if self._data is None:
-            self._data = data
-        else:
-            self._data += data
+        self._data += data
 
     def digest(self):
-        ''' Overload this method with your algorithm '''
         raise NotImplementedError()
 
     def hexdigest(self):
-        return self.digest().encode('hex')
+        return hexlify(self.digest())
 
 
 ##########################################################
@@ -86,7 +87,7 @@ class Md4(BaseAlgorithm):
     hex_length = 32
 
     def digest(self):
-        return hashlib.new('md4', self._data).digest()
+        return hashlib.new('md4', self.data).digest()
 
 
 class Md5(BaseAlgorithm):
@@ -96,7 +97,7 @@ class Md5(BaseAlgorithm):
     hex_length = 32
 
     def digest(self):
-        return hashlib.md5(self._data).digest()
+        return hashlib.md5(self.data).digest()
 
 
 class Sha1(BaseAlgorithm):
@@ -106,7 +107,7 @@ class Sha1(BaseAlgorithm):
     hex_length = 40
 
     def digest(self):
-        return hashlib.sha1(self._data).digest()
+        return hashlib.sha1(self.data).digest()
 
 
 class Sha224(BaseAlgorithm):
@@ -116,7 +117,7 @@ class Sha224(BaseAlgorithm):
     hex_length = 56
 
     def digest(self):
-        return hashlib.sha224(self._data).digest()
+        return hashlib.sha224(self.data).digest()
 
 
 class Sha256(BaseAlgorithm):
@@ -126,7 +127,7 @@ class Sha256(BaseAlgorithm):
     hex_length = 64
 
     def digest(self):
-        return hashlib.sha256(self._data).digest()
+        return hashlib.sha256(self.data).digest()
 
 
 class Sha384(BaseAlgorithm):
@@ -136,7 +137,7 @@ class Sha384(BaseAlgorithm):
     hex_length = 96
 
     def digest(self):
-        return hashlib.sha384(self._data).digest()
+        return hashlib.sha384(self.data).digest()
 
 
 class Sha512(BaseAlgorithm):
@@ -146,7 +147,7 @@ class Sha512(BaseAlgorithm):
     hex_length = 128
 
     def digest(self):
-        return hashlib.sha512(self._data).digest()
+        return hashlib.sha512(self.data).digest()
 
 
 class Ripemd160(BaseAlgorithm):
@@ -171,7 +172,7 @@ class Sha3_224(BaseAlgorithm):
     hex_length = 56
 
     def digest(self):
-        return sha3.sha3_224(self._data).digest()
+        return hashlib.sha3_224(self.data).digest()
 
 
 class Sha3_256(BaseAlgorithm):
@@ -181,7 +182,7 @@ class Sha3_256(BaseAlgorithm):
     hex_length = 64
 
     def digest(self):
-        return sha3.sha3_256(self._data).digest()
+        return hashlib.sha3_256(self.data).digest()
 
 
 class Sha3_384(BaseAlgorithm):
@@ -191,7 +192,7 @@ class Sha3_384(BaseAlgorithm):
     hex_length = 96
 
     def digest(self):
-        return sha3.sha3_384(self._data).digest()
+        return hashlib.sha3_384(self._data).digest()
 
 
 class Sha3_512(BaseAlgorithm):
@@ -201,7 +202,7 @@ class Sha3_512(BaseAlgorithm):
     hex_length = 128
 
     def digest(self):
-        return sha3.sha3_512(self._data).digest()
+        return hashlib.sha3_512(self.data).digest()
 
 
 ##########################################################
@@ -214,7 +215,7 @@ class Lm(BaseAlgorithm):
     hex_length = 32
 
     def digest(self):
-        return lmhash.encrypt(self._data[:15]).decode('hex')
+        return unhexlify(lmhash.encrypt(self.data[:15]))
 
 
 class Ntlm(BaseAlgorithm):
@@ -224,7 +225,7 @@ class Ntlm(BaseAlgorithm):
     hex_length = 32
 
     def digest(self):
-        return nthash.encrypt(self._data[:127]).decode('hex')
+        return unhexlify(nthash.encrypt(self.data[:127]))
 
 
 class MySql323(BaseAlgorithm):
@@ -234,7 +235,7 @@ class MySql323(BaseAlgorithm):
     hex_length = 16
 
     def digest(self):
-        return mysql323.encrypt(self._data[:64]).decode('hex')
+        return unhexlify(mysql323.encrypt(self.data[:64]))
 
 
 class MySql41(BaseAlgorithm):
@@ -245,7 +246,7 @@ class MySql41(BaseAlgorithm):
     hex_length = 40
 
     def digest(self):
-        return mysql41.encrypt(self._data[:64])[1:].decode('hex')
+        return unhexlify(mysql41.encrypt(self.data[:64])[1:])
 
 
 class Oracle10(BaseAlgorithm):
@@ -253,10 +254,12 @@ class Oracle10(BaseAlgorithm):
     Base Oracle 10g algorithm, this algorithm is salted with a username.
     Subclasses contain common usernames.
     '''
+
     hex_length = 16
+    _user = ''
 
     def digest(self):
-        return oracle10.encrypt(self._data[:64], user=self._user).decode('hex')
+        return unhexlify(oracle10.encrypt(self.data[:64], user=self._user))
 
 
 class Oracle10_Sys(Oracle10):
@@ -276,11 +279,11 @@ class Oracle10_System(Oracle10):
 class PostgresMd5(BaseAlgorithm):
 
     hex_length = 32
+    _user = ''
 
     def digest(self):
         ''' Removes the "md5" prefix '''
-        return postgres_md5.encrypt(self._data[:64],
-                                    user=self._user)[3:].decode('hex')
+        return unhexlify(postgres_md5.encrypt(self._data[:64], user=self._user)[3:])
 
 
 class PostgresMd5_Root(PostgresMd5):
@@ -312,7 +315,7 @@ class Msdcc_Administrator(BaseAlgorithm):
     _user = "administrator"
 
     def digest(self):
-        return msdcc.encrypt(self._data[:64], user=self._user).decode('hex')
+        return unhexlify(msdcc.encrypt(self._data[:64], user=self._user))
 
 
 class Msdcc2_Administrator(BaseAlgorithm):
@@ -323,7 +326,7 @@ class Msdcc2_Administrator(BaseAlgorithm):
     _user = "administrator"
 
     def digest(self):
-        return msdcc2.encrypt(self._data[:64], user=self._user).decode('hex')
+        return unhexlify(msdcc2.encrypt(self._data[:64], user=self._user))
 
 
 ##########################################################
@@ -348,17 +351,15 @@ algorithms = {
     Sha256.key: Sha256,
     Sha384.key: Sha384,
     Sha512.key: Sha512,
+    Sha3_224.key: Sha3_224,
+    Sha3_256.key: Sha3_256,
+    Sha3_384.key: Sha3_384,
+    Sha3_512.key: Sha3_512
 }
 
 if hasattr(hashlib, "algorithms_available"):
     if 'ripemd160' in hashlib.algorithms_available:
         algorithms[Ripemd160.key] = Ripemd160
-
-if sha3 is not None:
-    algorithms[Sha3_224.key] = Sha3_224
-    algorithms[Sha3_256.key] = Sha3_256
-    algorithms[Sha3_384.key] = Sha3_384
-    algorithms[Sha3_512.key] = Sha3_512
 
 if passlib is not None:
     algorithms[Lm.key] = Lm

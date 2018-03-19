@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ import platform
 from os import _exit, getcwd, path
 
 try:
-    from Algorithms import algorithms
+    from algorithms import algorithms
 except ImportError:
     sys.stderr.write("Missing file Algorithms.py")
     _exit(2)
@@ -132,7 +132,7 @@ def main(args):
         fout_path = args.output + '%s-%s.idx' % (fname[:fname.rfind('.')], algo.key)
         mode = 'wb'
         if path.exists(fout_path) and path.isfile(fout_path):
-            prompt = raw_input(PROMPT+'File already exists %s [w/a/skip]: ' % fout_path)
+            prompt = input(PROMPT+'File already exists %s [w/a/skip]: ' % fout_path)
             if prompt.lower() == 'a':
                 mode = 'ab'
             elif prompt.lower() != 'w':
@@ -148,28 +148,23 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Create unsorted IDX files',
-    )
+        description='Create unsorted IDX files')
     parser.add_argument('-v', '--version',
         action='version',
-        version='Create IDX 0.1.1',
-    )
+        version='Create IDX 0.1.1')
     parser.add_argument('-w',
         dest='wordlist',
         help='index passwords from text file',
-        required=True,
-    )
+        required=True)
     parser.add_argument('-a',
         nargs='*',
         dest='algorithms',
         help='hashing algorithm to use: %s' % (['all']+ sorted(algorithms.keys())),
-        required=True,
-    )
+        required=True)
     parser.add_argument('-o',
         dest='output',
         default=getcwd(),
-        help='output directory to write data to',
-    )
+        help='output directory to write data to')
     args = parser.parse_args()
     if path.exists(args.wordlist) and path.isfile(args.wordlist):
         args.output = path.abspath(args.output)
