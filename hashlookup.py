@@ -77,7 +77,7 @@ class LookupTable(object):
             raise ValueError('Wordlist file not found, or not readable')
         if self.index_size % ENTRY_SIZE:
             raise ValueError('Invalid index file')
-        self.index_count = self.index_size / ENTRY_SIZE
+        self.index_count = int(self.index_size / ENTRY_SIZE)
         self._info("Checking %s indexes ..." % self.index_count)
 
     def __getitem__(self, items):
@@ -99,7 +99,7 @@ class LookupTable(object):
 
     @property
     def words(self):
-        return int(self.index_size / ENTRY_SIZE)
+        return self.index_size // ENTRY_SIZE
 
     @property
     def wordlist_size(self):
@@ -143,7 +143,7 @@ class LookupTable(object):
                 algo = self.algorithm()
                 algo.update(word)
                 test = algo.hexdigest()
-                if test == hexdigest:
+                if test.decode() == hexdigest:
                     self._info("Found match at 0x%x -> '%s'" % (fpos, word))
                     return word
                 else:
@@ -156,7 +156,7 @@ class LookupTable(object):
         lower = self._lower
         upper = self.index_count - 1
         while upper >= lower:
-            middle = lower + ((upper - lower) / 2)
+            middle = lower + ((upper - lower) // 2)
             idx_digest = self._idx_digest(middle)
             if idx_digest > needle:
                 self._info("Target is lower than %d" % middle)
@@ -186,11 +186,11 @@ class LookupTable(object):
     def _idx_position(self, index):
         self.fp_index.seek((index * ENTRY_SIZE) + HASH_SIZE)
         fpos = self.fp_index.read(POS_SIZE)
-        return struct.unpack('<Q', fpos + '\x00\x00')[0]
+        return struct.unpack('<Q', fpos + b'\x00\x00')[0]
 
     def _word_at(self, offset):
         self.fp_wordlist.seek(offset)
-        return self.fp_wordlist.readline().strip('\r\n')
+        return self.fp_wordlist.readline().decode().strip()
 
 if __name__ == '__main__':
 
@@ -206,12 +206,12 @@ if __name__ == '__main__':
         results = table[hashes]
         lookup_time = time.time() - start
         sys.stdout.write('\n\t\t*** Results ***\n\n')
-        cracked = [key for key in results if key is not None]
+        cracked = [result for result in results if result is not None]
         for index, hsh in enumerate(cracked):
             sys.stdout.write("%d)  %s -> %s\n" % (index, hsh, results[hsh],))
             sys.stdout.flush()
         sys.stdout.write("%sTotal lookup time: %.6f\n" % (INFO, lookup_time))
-        percent = 100 * (float(len(cracked)) / float(len(hashes)))
+        percent = 100 * (float(len(cracked)) // float(len(hashes)))
         sys.stdout.write("%sCracked %d of %d (%3.2f%s)\n" % (MONEY, len(cracked), len(hashes), percent, '%'))
         sys.stdout.flush()
 

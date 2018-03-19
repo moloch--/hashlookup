@@ -67,7 +67,7 @@ def create_index(fword, fout, algorithm, flock):
         try:
             fdigest = algorithm(word).digest()[:8]  # Only take first 64bits of hash
             fpos = struct.pack('<Q', position)[:6]  # Get 48bit int in little endian
-            print('%s -> %s at %s' % (word, fdigest, fpos))
+            # print('%s -> %s at %s' % (word, fdigest, fpos))
             flock.acquire()
             fout.write(fdigest)
             fout.write(fpos)
@@ -84,11 +84,11 @@ def display_status(fword, fout, flock):
     try:
         megabyte = (1024.0 ** 2.0)
         fpath = path.abspath(fword.name)
-        size = path.getsize(fpath) / megabyte
+        size = path.getsize(fpath) // megabyte
         sys.stdout.write(INFO + 'Reading %s ...\n' % fpath)
         while not fword.closed and not fout.closed:
             flock.acquire()
-            fword_pos = float(fword.tell() / megabyte)
+            fword_pos = float(fword.tell() // megabyte)
             fout_pos = fout.tell()
             flock.release()
             sys.stdout.write(clear)

@@ -63,11 +63,17 @@ class BaseAlgorithm(object):
 
     @data.setter
     def data(self, value):
+        if isinstance(value, str):
+            value = value.encode()
         if not isinstance(value, bytes):
             raise TypeError('Data must be bytes')
         self._data = value
 
     def update(self, data):
+        if isinstance(data, str):
+            data = data.encode()
+        if not isinstance(data, bytes):
+            raise TypeError('Data must be bytes')
         self._data += data
 
     def digest(self):
