@@ -77,7 +77,7 @@ class LookupTable(object):
             raise ValueError('Wordlist file not found, or not readable')
         if self.index_size % ENTRY_SIZE:
             raise ValueError('Invalid index file')
-        self.index_count = int(self.index_size / ENTRY_SIZE)
+        self.index_count = self.index_size // ENTRY_SIZE
         self._info("Checking %s indexes ..." % self.index_count)
 
     def __getitem__(self, items):
@@ -215,9 +215,7 @@ if __name__ == '__main__':
         sys.stdout.write("%sCracked %d of %d (%3.2f%s)\n" % (MONEY, len(cracked), len(hashes), percent, '%'))
         sys.stdout.flush()
 
-    parser = argparse.ArgumentParser(
-        description='Search sorted IDX files for hashes',
-    )
+    parser = argparse.ArgumentParser(description='Search sorted IDX files for hashes')
     parser.add_argument('-v', '--version',
                         action='version',
                         version='LookupTable 0.1.2')
