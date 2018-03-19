@@ -6,15 +6,11 @@ Introduction
 
 There are three components to this system:
 
-1. The indexing script (createidx.py), which takes a wordlist and builds
-   a lookup table index for a hash function and the words in the list.
+1. The indexing script `createidx.py`, which takes a wordlist and builds a lookup table index for a hash function and the words in the list.
 
-2. The indexing sorter program (sortidx.c), which sorts an index created by the
-   indexing script, so that the lookup script can use a binary search on the
-   index to crack hashes.
+2. The indexing sorter program `sortidx.c`, which sorts an index created by the indexing script, so that the lookup script can use a binary search on the index to crack hashes.
 
-3. The lookup script (LookupTable.py), which uses the wordlist and index to
-   crack hashes.
+3. The lookup script `hashlookup.py`, which uses the wordlist and index to crack hashes.
 
 Suported Algorithms:
  * lm

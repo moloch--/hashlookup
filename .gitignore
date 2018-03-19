@@ -1,3 +1,9 @@
+checksort
+sortidx
+
+words.txt
+test/
+
 # Python files
 *.py[co]
 

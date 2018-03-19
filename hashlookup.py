@@ -211,14 +211,14 @@ if __name__ == '__main__':
             sys.stdout.write("%d)  %s -> %s\n" % (index, hsh, results[hsh],))
             sys.stdout.flush()
         sys.stdout.write("%sTotal lookup time: %.6f\n" % (INFO, lookup_time))
-        percent = 100 * (float(len(cracked)) // float(len(hashes)))
+        percent = 100 * len(cracked) / len(hashes)
         sys.stdout.write("%sCracked %d of %d (%3.2f%s)\n" % (MONEY, len(cracked), len(hashes), percent, '%'))
         sys.stdout.flush()
 
     parser = argparse.ArgumentParser(description='Search sorted IDX files for hashes')
     parser.add_argument('-v', '--version',
                         action='version',
-                        version='LookupTable 0.1.2')
+                        version='hashlookup 0.1.3')
     parser.add_argument('-d', '--debug',
                         action='store_true',
                         dest='debug',
@@ -226,20 +226,19 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--decoder',
                         dest='decoder',
                         help='decode hashes using an encoder')
-    parser.add_argument('-w',
+    parser.add_argument('-w', '--wordlist',
                         dest='wordlist',
                         help='wordlist file',
                         required=True)
-    parser.add_argument('-i',
+    parser.add_argument('-i', '--index',
                         dest='index',
                         help='the .idx file matching the wordlist',
                         required=True)
-    parser.add_argument('-a',
+    parser.add_argument('-a', '--algorithm',
                         dest='algorithm',
-                        help='hashing algorithm: %s' % sorted(
-                            algorithms.keys()),
+                        help='hashing algorithm: %s' % sorted(algorithms.keys()),
                         required=True)
-    parser.add_argument('-c',
+    parser.add_argument('-c', '--crack',
                         nargs='*',
                         dest='hash',
                         help='crack a file or list of hashes')
