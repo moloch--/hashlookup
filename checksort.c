@@ -40,8 +40,7 @@ void freadIndexEntryAt(FILE* file, int64_t index, struct IndexEntry* out)
  */
 int hashcmp(const unsigned char hashA[INDEX_HASH_WIDTH], const unsigned char hashB[INDEX_HASH_WIDTH])
 {
-    int i = 0;
-    for(i = 0; i < INDEX_HASH_WIDTH; i++)
+    for(int i = 0; i < INDEX_HASH_WIDTH; i++)
     {
         if(hashA[i] > hashB[i])
             return 1;
@@ -80,7 +79,8 @@ int main(int argc, char **argv)
         freadIndexEntryAt(file, i, &current);
         if(hashcmp(current.hash, max.hash) < 0) // Current is less than max
         {
-            printf("NOT SORTED!!!!\n");
+            printf("%08x is less than %08x", current.hash, max.hash);
+            printf(" -- NOT SORTED!!!!\n");
             return 2;
         }
         max = current;

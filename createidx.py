@@ -63,17 +63,17 @@ def create_index(fword, fout, algorithm, flock):
     position = fword.tell()
     line = fword.readline()
     while line:
-        word = line.strip('\r\n')
+        word = line.decode().strip().encode()
         try:
             fdigest = algorithm(word).digest()[:8]  # Only take first 64bits of hash
             fpos = struct.pack('<Q', position)[:6]  # Get 48bit int in little endian
+            print('%s -> %s at %s' % (word, fdigest, fpos))
             flock.acquire()
-            fout.write("%s%s" % (fdigest, fpos))
+            fout.write(fdigest)
+            fout.write(fpos)
             flock.release()
         except KeyboardInterrupt:
             return
-        except UnicodeDecodeError:
-            pass  # Ignore decode errors, just keep going
         finally:
             position = fword.tell()
             line = fword.readline()

@@ -32,10 +32,12 @@ import hashlib
 import argparse
 import platform
 
+from binascii import hexlify, unhexlify
+
 try:
-    from Algorithms import algorithms
+    from algorithms import algorithms
 except ImportError:
-    sys.stderr.write("Missing file Algorithms.py")
+    sys.stderr.write("Missing file algorithms.py")
     os._exit(2)
 
 # Pretty colors :D
@@ -97,7 +99,7 @@ class LookupTable(object):
 
     @property
     def words(self):
-        return self.index_size / ENTRY_SIZE
+        return int(self.index_size / ENTRY_SIZE)
 
     @property
     def wordlist_size(self):
@@ -129,7 +131,7 @@ class LookupTable(object):
 
     def _crack(self, hexdigest):
         self._info("Cracking hash %s" % hexdigest)
-        needle = hexdigest.decode('hex')[:8]
+        needle = unhexlify(hexdigest)[:8]
         collision = self._find_collision(needle)
         if collision is not None:
             self._info("Collision found at offset 0x%x" % collision)
@@ -177,7 +179,7 @@ class LookupTable(object):
 
     def _idx_digest(self, index):
         if index not in self._cache:
-            self.fp_index.seek(index * ENTRY_SIZE)
+            self.fp_index.seek(int(index * ENTRY_SIZE))
             self._cache[index] = self.fp_index.read(HASH_SIZE)
         return self._cache[index]
 
@@ -204,14 +206,13 @@ if __name__ == '__main__':
         results = table[hashes]
         lookup_time = time.time() - start
         sys.stdout.write('\n\t\t*** Results ***\n\n')
-        cracked = filter(lambda key: results[key] is not None, results)
+        cracked = [key for key in results if key is not None]
         for index, hsh in enumerate(cracked):
-            sys.stdout.write(str(index) + ")  %s -> %s\n" % (hsh, results[hsh],))
+            sys.stdout.write("%d)  %s -> %s\n" % (index, hsh, results[hsh],))
             sys.stdout.flush()
         sys.stdout.write("%sTotal lookup time: %.6f\n" % (INFO, lookup_time))
         percent = 100 * (float(len(cracked)) / float(len(hashes)))
-        sys.stdout.write("%sCracked %d of %d (%3.2f%s)\n" %
-                         (MONEY, len(cracked), len(hashes), percent, '%'))
+        sys.stdout.write("%sCracked %d of %d (%3.2f%s)\n" % (MONEY, len(cracked), len(hashes), percent, '%'))
         sys.stdout.flush()
 
     parser = argparse.ArgumentParser(
@@ -249,7 +250,7 @@ if __name__ == '__main__':
         algorithm=args.algorithm.lower(),
         index_file=args.index,
         wordlist_file=args.wordlist,
-        verbose=args.debug if not args.benchmark else False)
+        verbose=args.debug)
     if args.hash is not None:
         _cli(args, table)
     else:
