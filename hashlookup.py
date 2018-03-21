@@ -34,11 +34,8 @@ import platform
 
 from binascii import hexlify, unhexlify
 
-try:
-    from algorithms import algorithms
-except ImportError:
-    sys.stderr.write("Missing file algorithms.py")
-    os._exit(2)
+from .algorithms import algorithms
+
 
 # Pretty colors :D
 if platform.system().lower() in ['linux', 'darwin']:
