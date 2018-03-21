@@ -31,10 +31,15 @@ import struct
 import hashlib
 import argparse
 import platform
+import logging
 
 from binascii import hexlify, unhexlify
 
-from .algorithms import algorithms
+# Because Python 3 is fucking stupid
+try:
+    from .algorithms import algorithms
+except ImportError:
+    from algorithms import algorithms
 
 
 # Pretty colors :D
@@ -56,7 +61,10 @@ HASH_SIZE = 8
 ENTRY_SIZE = POS_SIZE + HASH_SIZE
 
 
+
 class LookupTable(object):
+
+    LOGGER = logging.getLogger(__file__)
 
     def __init__(self, algorithm, index_file, wordlist_file, verbose=False):
         self.verbose = verbose
@@ -106,11 +114,13 @@ class LookupTable(object):
         if self.verbose:
             sys.stdout.write(INFO + msg + '\n')
             sys.stdout.flush()
+        self.LOGGER.info(msg)
 
     def _warn(self, msg):
         if self.verbose:
             sys.stdout.write(WARN + msg + '\n')
             sys.stdout.flush()
+        self.LOGGER.warn(msg)
 
     def _open(self, file_path):
         if os.path.exists(file_path) and os.path.isfile(file_path):
