@@ -72,6 +72,8 @@ def create_index(fword, fout, algorithm, flock):
             fout.write(fdigest)
             fout.write(fpos)
             flock.release()
+        except UnicodeDecodeError:
+            pass
         except KeyboardInterrupt:
             return
         finally:
