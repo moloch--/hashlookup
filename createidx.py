@@ -139,7 +139,7 @@ def main(args):
                 mode = None
         if mode is not None:
             fout = open(fout_path, mode)
-            sys.stdout.write(clear + INFO + "Creating %s index ...\n" % algo.name)
+            sys.stdout.write(clear + INFO + "Creating " + bold + algo.name + W + " index ...\n")
             sys.stdout.flush()
             index_wordlist(fword, fout, algo, flock)
             sys.stdout.write(clear + INFO + "Completed index file %s\n" % fout_path)

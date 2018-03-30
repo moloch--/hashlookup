@@ -120,7 +120,8 @@ class LookupTable(object):
         if self.verbose:
             sys.stdout.write(WARN + msg + '\n')
             sys.stdout.flush()
-        self.LOGGER.warn(msg)
+        else:
+            self.LOGGER.warn(msg)
 
     def _open(self, file_path):
         if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -147,14 +148,14 @@ class LookupTable(object):
                 fpos = self._idx_position(index)
                 self._info("Testing collision at 0x%x" % fpos)
                 word = self._word_at(fpos)
+                self._info("Possible preimage: %s" % word)
                 algo = self.algorithm()
                 algo.update(word)
-                test = algo.hexdigest()
-                if test.decode() == hexdigest:
+                if algo.hexdigest().decode() == hexdigest:
                     self._info("Found match at 0x%x -> '%s'" % (fpos, word))
                     return word
                 else:
-                    self._info("False alarm: %s != %s" % (test, hexdigest,))
+                    self._info("False alarm: %s != %s" % (word, hexdigest,))
                 index += 1
         self._warn("No matches found for: %s" % hexdigest)
         return None
@@ -166,10 +167,10 @@ class LookupTable(object):
             middle = lower + ((upper - lower) // 2)
             idx_digest = self._idx_digest(middle)
             if idx_digest > needle:
-                self._info("Target is lower than %d" % middle)
+                self._info("Target is lower than %r" % middle)
                 upper = middle - 1
             elif idx_digest < needle:
-                self._info("Target is higher than %d" % middle)
+                self._info("Target is higher than %r" % middle)
                 lower = middle + 1
             else:
                 return middle
@@ -213,7 +214,7 @@ if __name__ == '__main__':
         results = table[hashes]
         lookup_time = time.time() - start
         sys.stdout.write('\n\t\t*** Results ***\n\n')
-        cracked = [result for result in results if result is not None]
+        cracked = {k: v for k, v in results.items() if v is not None}
         for index, hsh in enumerate(cracked):
             sys.stdout.write("%d)  %s -> %s\n" % (index, hsh, results[hsh],))
             sys.stdout.flush()
