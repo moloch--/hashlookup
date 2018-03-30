@@ -63,7 +63,7 @@ def create_index(fword, fout, algorithm, flock):
     position = fword.tell()
     line = fword.readline()
     while line:
-        word = line.decode().strip().encode()
+        word = line.strip()
         try:
             fdigest = algorithm(word).digest()[:8]  # Only take first 64bits of hash
             fpos = struct.pack('<Q', position)[:6]  # Get 48bit int in little endian
@@ -84,17 +84,17 @@ def display_status(fword, fout, flock):
     try:
         megabyte = (1024.0 ** 2.0)
         fpath = path.abspath(fword.name)
-        size = path.getsize(fpath) // megabyte
+        size = path.getsize(fpath) / megabyte
         sys.stdout.write(INFO + 'Reading %s ...\n' % fpath)
         while not fword.closed and not fout.closed:
             flock.acquire()
-            fword_pos = float(fword.tell() // megabyte)
+            fword_pos = float(fword.tell() / megabyte)
             fout_pos = fout.tell()
             flock.release()
             sys.stdout.write(clear)
             sys.stdout.write(INFO + '%.2f Mb of %.2f Mb' % (fword_pos, size))
-            sys.stdout.write(' (%3.2f%s) ->' % ((100.0 * (fword_pos // size)), '%',))
-            sys.stdout.write(' "%s" (%.2f Mb)' % (fout.name, float(fout_pos // megabyte)))
+            sys.stdout.write(' (%3.2f%s) ->' % ((100.0 * (fword_pos / size)), '%',))
+            sys.stdout.write(' "%s" (%.2f Mb)' % (fout.name, float(fout_pos / megabyte)))
             sys.stdout.flush()
             time.sleep(0.25)
     except Exception as error:
