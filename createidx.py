@@ -40,17 +40,17 @@ except ImportError:
     sys.stderr.write("Missing file Algorithms.py")
     _exit(2)
 
-if platform.system().lower() in ['linux', 'darwin']:
-    W = "\033[0m"  # default/white
-    R = "\033[31m"  # red
-    P = "\033[35m"  # purple
-    C = "\033[36m"  # cyan
-    O = "\033[33m"
-    bold = "\033[1m"
-    clear = chr(27) + '[2K\r'
-else:
-    bold = W = R = P = C = O = ""
-    clear = '\n'
+if platform.system().lower() in ['windows']:
+    print("[!] It appears you're running a shitty operating system" + \
+          " make sure to use a real terminal emulator (not cmd.exe)")
+
+W = "\033[0m"  # default/white
+R = "\033[31m"  # red
+P = "\033[35m"  # purple
+C = "\033[36m"  # cyan
+O = "\033[33m"
+bold = "\033[1m"
+clear = chr(27) + '[2K\r'
 
 INFO = bold + C + "[*] " + W
 WARN = bold + R + "[!] " + W
