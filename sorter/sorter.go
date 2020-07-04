@@ -57,7 +57,7 @@ import (
 )
 
 const (
-	digestSize = 6
+	digestSize = 8
 	offsetSize = 6
 	entrySize  = digestSize + offsetSize
 
